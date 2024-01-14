@@ -1,4 +1,4 @@
-module PhageTree
+module BiophysViabilityModel
     using Random, LinearAlgebra, Statistics
     using Base: front, tail
     using Flux: gradient, params, @functor, update!, Adam, logsoftmax, flatten
@@ -43,7 +43,6 @@ module PhageTree
     include("indep_model.jl")
     include("optimize_depletion.jl")
     include("analysis.jl")
-    include("PhageTreeMC.jl")
     include("learn_mu.jl")
 
 end # module

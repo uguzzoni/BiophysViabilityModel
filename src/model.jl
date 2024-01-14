@@ -38,7 +38,7 @@ end
 
         
 struct Model{St,M,Z,F}
-    states=(PhageTree.ZeroEnergy(),PhageTree.DeepEnergy(create_model_energy()));
+    states=(ZeroEnergy(),DeepEnergy(create_model_energy()));
     μ= zeros(2,1); # μ[w,r] chemical potential of state 'w' in round 'r'
     ζ= zeros(1); # exp(-ζ[r]) is the amplification factor at round 'r'
     select=reshape([false, true], 2, 1);      # select[w,r] is true if state 'w' is selected in round 'r'

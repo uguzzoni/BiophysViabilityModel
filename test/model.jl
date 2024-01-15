@@ -33,7 +33,7 @@ end
 @testset "sample_reads" begin
     Random.seed!(1)
     data = random_data()
-    data_ = PhageTree.sample_reads(data, 10^6)
+    data_ = BiophysViabilityModel.sample_reads(data, 10^6)
     @test data_.ancestors == data.ancestors
     @test data_.sequences == data.sequences
     @test normalize_counts(data.counts) ≈ normalize_counts(data_.counts) rtol=1e-1

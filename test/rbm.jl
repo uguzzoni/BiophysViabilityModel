@@ -1,5 +1,5 @@
-using Test, PhageTree, LinearAlgebra, OneHot, Flux, Zygote
-using PhageTree: cgf, sum_, hidden_inputs
+using Test, BiophysViabilityModel, LinearAlgebra, OneHot, Flux, Zygote
+using BiophysViabilityModel: cgf, sum_, hidden_inputs
 
 A = 4; L = 7; S = 5; m = 2
 seqs = OneHotArray(rand(1:A, L, S), A)

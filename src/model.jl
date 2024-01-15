@@ -38,11 +38,12 @@ end
 
         
 struct Model{St,M,Z,F}
-    states=(ZeroEnergy(),DeepEnergy(create_model_energy()));
-    μ= zeros(2,1); # μ[w,r] chemical potential of state 'w' in round 'r'
-    ζ= zeros(1); # exp(-ζ[r]) is the amplification factor at round 'r'
-    select=reshape([false, true], 2, 1);      # select[w,r] is true if state 'w' is selected in round 'r'
-    washed=reshape([true, false], 2, 1);     # washed[w,r] is true if state 'w' is washed out in round 'r'
+    states::St
+    μ::M # μ[w,r] chemical potential of state 'w' in round 'r'
+    ζ::Z # exp(-ζ[r]) is the amplification factor at round 'r'
+    select::F # select[w,r] is true if state 'w' is selected in round 'r'
+    washed::F # washed[w,r] is true if state 'w' is washed out in round 'r'
+   
     function Model(
         states,
         μ::AbstractMatrix,
@@ -50,6 +51,13 @@ struct Model{St,M,Z,F}
         select::AbstractMatrix,
         washed::AbstractMatrix,
     )
+
+    states=(ZeroEnergy(),DeepEnergy(create_model_energy()));
+    μ= zeros(2,1); # μ[w,r] chemical potential of state 'w' in round 'r'
+    ζ= zeros(1); # exp(-ζ[r]) is the amplification factor at round 'r'
+    select=reshape([false, true], 2, 1);      # select[w,r] is true if state 'w' is selected in round 'r'
+    washed=reshape([true, false], 2, 1);     # washed[w,r] is true if state 'w' is washed out in round 'r'
+    
         @assert size(μ, 1) == number_of_states(states)
         @assert size(μ, 2) == length(ζ)
         @assert size(μ) == size(select) == size(washed)

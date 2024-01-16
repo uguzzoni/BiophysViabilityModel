@@ -34,12 +34,12 @@ function random_ancestors(n::Int)
     return ancestors
 end
 
-function random_data(; A::Int = 3, L::Int = 4, T::Int = 7, W::Int = 4, S::Int = 128)
+function random_data(; A::Int = 21, L::Int = 57, T::Int = 2, S::Int = 128)
     sequences = falses(A, L, S)
     for s=1:S, i=1:L
         sequences[rand(1:A), i, s] = true
     end
-    ancestors = random_ancestors(T)
+    ancestors = (0,1)
     counts = rand(S, T)
     return Data(sequences, counts, ancestors)
 end

@@ -1,5 +1,7 @@
 include("init.jl")
 
+import BiophysViabilityModel:minibatches,MiniBatch
+ 
 @testset "minibatches" begin
     @test minibatches(10, 3; fullonly=true)  == [1:3, 4:6, 7:9]
     @test minibatches(10, 3; fullonly=false) == [1:3, 4:6, 7:9, 10:10]

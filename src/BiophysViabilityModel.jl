@@ -12,31 +12,42 @@ module BiophysViabilityModel
     using Distributions: Multinomial
     using LogExpFunctions: logexpm1, logsumexp, log1pexp, log1mexp
     import Flux, AbstractTrees, ChainRulesCore
+    import Flux: Chain, Conv, SamePad, BatchNorm, MaxPool, Dense, relu, identity
 
-    export Data, Model, IndepModel, MiniBatch
+
+
+
+
+    export Data, Experiment, Model
     export energies, log_selectivities, selectivities
-    export log_likelihood, log_likelihood_samples
-    export ConstEnergy, ZeroEnergy, AndEnergy
-    export IndepSite, Epistasis
-    export DeepEnergy, SimpleAR
-    export RBM, Gaussian, Bernoulli
-    export learn!
-    export simulate
-    export number_of_rounds, number_of_libraries, number_of_samples, number_of_sequences
-    export alphabet_size, sequence_length, select_sequences
-    export log_abundances
-    export number_of_states
-    export optimize_depletion!, optimize_depletion
-    export tensordot
-    export zerosum, rare_binding_gauge, rare_binding_gauge!
-    export Δenergies, flip, flip!, MCParetoTrial!, MCPareto!, ToParetoFront!
+    export DeepEnergy, ZeroEnergy, learn!
+    export number_of_states, number_of_rounds, number_of_libraries, number_of_samples, number_of_sequences, sequence_length, alphabet_size
+    export log_likelihood, log_likelihood_samples, log_abundances
+
+    # export Data, Model, IndepModel, MiniBatch
+    # export energies, log_selectivities, selectivities
+    # export log_likelihood, log_likelihood_samples
+    # export ConstEnergy, ZeroEnergy, AndEnergy
+    # export IndepSite, Epistasis
+    # export DeepEnergy, SimpleAR
+    # export RBM, Gaussian, Bernoulli
+    # export learn!
+    # export simulate
+    # export number_of_rounds, number_of_libraries, number_of_samples, number_of_sequences
+    # export alphabet_size, sequence_length, select_sequences
+    # export log_abundances
+    # export number_of_states
+    # export optimize_depletion!, optimize_depletion
+    # export tensordot
+    # export zerosum, rare_binding_gauge, rare_binding_gauge!
+    # export Δenergies, flip, flip!, MCParetoTrial!, MCPareto!, ToParetoFront!
 
 
     include("data.jl")
     include("energies.jl")
     include("model.jl")
     include("util.jl")
-    include("rbm.jl")
+    #include("rbm.jl")
     include("ancestors.jl")
     include("node.jl")
     include("simulate.jl")

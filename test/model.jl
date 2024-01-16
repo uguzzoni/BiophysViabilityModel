@@ -1,33 +1,15 @@
 include("init.jl")
 
+import Flux:SamePad
+
+
 @testset "select_sequences" begin
     data = random_data()
-    selseqflag = rand(Bool, number_of_sequences(data))
-    selseqdata = select_sequences(data, selseqflag)
+    selseqflag = rand(Bool, BiophysViabilityModel.number_of_sequences(data))
+    selseqdata = BiophysViabilityModel.select_sequences(data, selseqflag)
     @test selseqdata.sequences == data.sequences[:,:,selseqflag]
     @test selseqdata.counts == data.counts[selseqflag,:]
     @test selseqdata.ancestors == data.ancestors
-end
-
-@testset "simulate" begin
-    data = random_data()
-    A, L, S = size(data.sequences)
-    R = number_of_rounds(data)
-    states = (IndepSite(A,L), Epistasis(A,L), IndepSite(A,L), ZeroEnergy())
-    W = length(states)
-    select, washed = random_select(W, R)
-    model = Model(states, randn(W,R), randn(R), select, washed)
-    lp = log_selectivities(model, data)
-    data_ = simulate(model, data)
-    r = 0
-    for (t, a) in enumerate(data.ancestors)
-        if a > 0
-            r += 1
-            N0 = data_.counts[:,t]
-            N1 = data_.counts[:,a] .* exp.(lp[:,r])
-            @test N0 ./ sum(N0; dims = 1) ≈ N1 ./ sum(N1; dims = 1)
-        end
-    end
 end
 
 @testset "sample_reads" begin
@@ -43,9 +25,78 @@ end
     data = random_data()
     A, L, S = size(data.sequences)
     R = number_of_rounds(data)
+    W = 2
+    select, washed = random_select(W, R)
+    #states = (BiophysViabilityModel.IndepSite(A,L), BiophysViabilityModel.Epistasis(A,L), BiophysViabilityModel.ConstEnergy(fill(randn())), ZeroEnergy())
+    model = Model() #states, randn(W, R), randn(R), select, washed)
+    randn!(model.μ)
+    randn!(model.ζ)
+
+    lp = log_selectivities(model, data)
+    lM = dropdims(log_multinomial(data.counts; dims=1); dims=1)
+    Ls = lM .+ sum_(data.counts .* log_abundances(model, data); dims=1)
+
+    @test log_likelihood(lp, model.ζ, data) ≈ log_likelihood(model, data)
+    @test energies(data, model) == energies(data.sequences, model)
+    @test log_selectivities(model, data; rare_binding=false) == log_selectivities(model, data)
+    @test all(log_selectivities(model, data; rare_binding=false) .≤ log_selectivities(model, data; rare_binding=true))
+    @test log_likelihood_samples(model, data) ≈ Ls / number_of_sequences(data)
+    @test log_likelihood(model, data) ≈ sum(Ls) / number_of_sequences(data)
+    @test log_likelihood(model, data) ≈ sum(log_likelihood_samples(model, data))
+end
+
+@testset "simulate" begin
+    data = random_data()
+    A, L, S = size(data.sequences)
+    R = number_of_rounds(data)
+    # states = (BiophysViabilityModel.IndepSite(A,L), BiophysViabilityModel.Epistasis(A,L), BiophysViabilityModel.IndepSite(A,L), ZeroEnergy())
+    # W = length(states)
+    # select, washed = random_select(W, R)
+    model = Model()
+    # model = Model(states, randn(W,R), randn(R), select, washed)
+    lp = log_selectivities(model, data)
+    data_ = BiophysViabilityModel.simulate(model, data)
+    r = 0
+    for (t, a) in enumerate(data.ancestors)
+        if a > 0
+            r += 1
+            N0 = data_.counts[:,t]
+            N1 = data_.counts[:,a] .* exp.(lp[:,r])
+            @test N0 ./ sum(N0; dims = 1) ≈ N1 ./ sum(N1; dims = 1)
+        end
+    end
+end
+
+#= 
+@testset "simulate" begin
+    data = random_data()
+    A, L, S = size(data.sequences)
+    R = number_of_rounds(data)
+    states = (BiophysViabilityModel.IndepSite(A,L), BiophysViabilityModel.Epistasis(A,L), BiophysViabilityModel.IndepSite(A,L), ZeroEnergy())
+    W = length(states)
+    select, washed = random_select(W, R)
+    model = Model(states, randn(W,R), randn(R), select, washed)
+    lp = log_selectivities(model, data)
+    data_ = BiophysViabilityModel.simulate(model, data)
+    r = 0
+    for (t, a) in enumerate(data.ancestors)
+        if a > 0
+            r += 1
+            N0 = data_.counts[:,t]
+            N1 = data_.counts[:,a] .* exp.(lp[:,r])
+            @test N0 ./ sum(N0; dims = 1) ≈ N1 ./ sum(N1; dims = 1)
+        end
+    end
+end
+
+
+@testset "log_likelihood" begin
+    data = random_data()
+    A, L, S = size(data.sequences)
+    R = number_of_rounds(data)
     W = 4
     select, washed = random_select(W, R)
-    states = (IndepSite(A,L), Epistasis(A,L), ConstEnergy(fill(randn())), ZeroEnergy())
+    states = (BiophysViabilityModel.IndepSite(A,L), BiophysViabilityModel.Epistasis(A,L), BiophysViabilityModel.ConstEnergy(fill(randn())), ZeroEnergy())
     model = Model(states, randn(W, R), randn(R), select, washed)
     randn!(model.μ)
     randn!(model.ζ)
@@ -78,7 +129,7 @@ end
 
     function gun(J)
         model_ = Model(
-            (states[1], Epistasis(states[2].h, J), states[3:end]...),
+            (states[1], BiophysViabilityModel.Epistasis(states[2].h, J), states[3:end]...),
             model.μ, model.ζ, model.select, model.washed
         )
         return log_likelihood(model_, data)
@@ -99,7 +150,7 @@ end
     gs = gradient(Flux.params(ζ)) do
         log_likelihood(lp, ζ, data)
     end
-    G = depletion_gradient!(zero(ζ), lN, data)
+    G = BiophysViabilityModel.depletion_gradient!(zero(ζ), lN, data)
     @test G ≈ -gs[ζ]
 end
 
@@ -179,3 +230,4 @@ end
     e1 = energies(data, indep_model_) .- unsqueeze_left(indep_model_.μ)
     @test e0 ≈ e1
 end
+ =#

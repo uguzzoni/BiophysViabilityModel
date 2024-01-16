@@ -13,67 +13,15 @@ There are R = T - T0 rounds of selection.
 
 
 #create_model_energy() #kelsic data
-function create_model_energy(;A::Int=20)
-    model = Chain(
-        x-> reshape(x, size(x,1), size(x,2), 1, size(x,3)), #adds the channel dimension
-        Conv((A,7), 1 => 12, relu, pad=SamePad()),
-        BatchNorm(12),
-        MaxPool((A,2), stride=(1,2)),
-        Conv((1,7), 12 => 24, relu, pad=SamePad()),
-        BatchNorm(24),
-        MaxPool((1,2),stride=(1,2)),
-        Flux.flatten,
-        x -> reshape(x, size(x,1), 1, :),
-        Dense(672 => 128, relu),
-        BatchNorm(1),
-        Dense(128 => 64, relu),
-        BatchNorm(1),
-        x -> reshape(x, size(x,1), :),
-        Dense(64 => 2, identity),
-        @views x -> x[2,:] .- x[1,:]
-    )
-    return model
-end
 
-# function create_model_energy(;A::Int=20,L::Int=7)
-#     model = Chain(
-#         x-> reshape(x, size(x,1), size(x,2), 1, size(x,3)),
-#         Dense(128 => 64, relu), #adds the channel dimension
-#         Conv((A,L), 1 => 12, relu, pad=SamePad()),
-#         BatchNorm(12),
-#         MaxPool((20,2), stride=(1,2)),
-#         Conv((1,L), 12 => 24, relu, pad=SamePad()),
-#         BatchNorm(24),
-#         MaxPool((1,2),stride=(1,2)),
-#         Flux.flatten,
-#         x -> reshape(x, size(x,1), 1, :),
-#         Dense(672 => 128, relu),
-#         BatchNorm(1),
-#         Dense(128 => 64, relu),
-#         BatchNorm(1),
-#         x -> reshape(x, size(x,1), :),
-#         Dense(64 => 2, identity),
-#         @views x -> x[2,:] .- x[1,:]
-#     )
-#     return model
-# end
-        
 struct Model{St,M,Z,F}
     states::St
     μ::M # μ[w,r] chemical potential of state 'w' in round 'r'
     ζ::Z # exp(-ζ[r]) is the amplification factor at round 'r'
     select::F # select[w,r] is true if state 'w' is selected in round 'r'
     washed::F # washed[w,r] is true if state 'w' is washed out in round 'r'
-   
     function Model(;A::Int=20)
-    #     states,
-    #     μ::AbstractMatrix,
-    #     ζ::AbstractVector,
-    #     select::AbstractMatrix,
-    #     washed::AbstractMatrix,
-    # )
-
-        states=(ZeroEnergy(),DeepEnergy(create_model_energy(;A=A)));
+        states= Kelsic_states()
         μ= zeros(2,1); # μ[w,r] chemical potential of state 'w' in round 'r'
         ζ= zeros(1); # exp(-ζ[r]) is the amplification factor at round 'r'
         select=reshape([false, true], 2, 1);      # select[w,r] is true if state 'w' is selected in round 'r'
@@ -114,6 +62,7 @@ end
 #         return new{typeof(states), typeof(μ), typeof(ζ), typeof(select)}(states, μ, ζ, select, washed)
 #     end
 # end
+
 Flux.trainable(model::Model) = (model.states, model.μ, model.ζ)
 @functor Model
 

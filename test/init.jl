@@ -8,7 +8,6 @@ using AbstractTrees
 using BiophysViabilityModel
 using BiophysViabilityModel: sum_, mean_, logsumexp_, select_mask
 using BiophysViabilityModel: number_of_rounds, number_of_libraries, normalize_counts
-using BiophysViabilityModel: depletion_gradient!
 using BiophysViabilityModel: log_multinomial, invsigmoid, invlogsigmoid
 using BiophysViabilityModel: collect_all_possible_sequences, collect_all_possible_sequences_onehot
 using BiophysViabilityModel: unsqueeze_left, unsqueeze_right

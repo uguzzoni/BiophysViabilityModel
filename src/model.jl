@@ -11,17 +11,16 @@ connecting a non-root node 't' to its ancestor has index r = t - T0.
 There are R = T - T0 rounds of selection.
 =#
 
-
-#create_model_energy() #kelsic data
-
+        
 struct Model{St,M,Z,F}
     states::St
     μ::M # μ[w,r] chemical potential of state 'w' in round 'r'
     ζ::Z # exp(-ζ[r]) is the amplification factor at round 'r'
     select::F # select[w,r] is true if state 'w' is selected in round 'r'
     washed::F # washed[w,r] is true if state 'w' is washed out in round 'r'
-    function Model(;A::Int=20)
-        states= Kelsic_states()
+   
+    function Model()
+        states=(ZeroEnergy(),Kelsic_model());
         μ= zeros(2,1); # μ[w,r] chemical potential of state 'w' in round 'r'
         ζ= zeros(1); # exp(-ζ[r]) is the amplification factor at round 'r'
         select=reshape([false, true], 2, 1);      # select[w,r] is true if state 'w' is selected in round 'r'
@@ -36,32 +35,24 @@ struct Model{St,M,Z,F}
         @assert all(any(select; dims = 1)) # at least one state selected in every round
         return new{typeof(states), typeof(μ), typeof(ζ), typeof(select)}(states, μ, ζ, select, washed)
     end
+
+    function Model(
+                states,
+                μ::AbstractMatrix,
+                ζ::AbstractVector,
+                select::AbstractMatrix,
+                washed::AbstractMatrix,
+        )
+        @assert size(μ, 1) == number_of_states(states)
+        @assert size(μ, 2) == length(ζ)
+        @assert size(μ) == size(select) == size(washed)
+        @assert all((select .== 0) .| (select .== 1))
+        @assert all((washed .== 0) .| (washed .== 1))
+        @assert iszero(select .& washed) # select and washed states are disjoint
+        @assert all(any(select; dims = 1)) # at least one state selected in every round
+        return new{typeof(states), typeof(μ), typeof(ζ), typeof(select)}(states, μ, ζ, select, washed)
+    end
 end
-
-
-# struct Model{St,M,Z,F}
-#     states::St
-#     μ::M # μ[w,r] chemical potential of state 'w' in round 'r'
-#     ζ::Z # exp(-ζ[r]) is the amplification factor at round 'r'
-#     select::F # select[w,r] is true if state 'w' is selected in round 'r'
-#     washed::F # washed[w,r] is true if state 'w' is washed out in round 'r'
-#     function Model(
-#         states,
-#         μ::AbstractMatrix,
-#         ζ::AbstractVector,
-#         select::AbstractMatrix,
-#         washed::AbstractMatrix,
-#     )
-#         @assert size(μ, 1) == number_of_states(states)
-#         @assert size(μ, 2) == length(ζ)
-#         @assert size(μ) == size(select) == size(washed)
-#         @assert all((select .== 0) .| (select .== 1))
-#         @assert all((washed .== 0) .| (washed .== 1))
-#         @assert iszero(select .& washed) # select and washed states are disjoint
-#         @assert all(any(select; dims = 1)) # at least one state selected in every round
-#         return new{typeof(states), typeof(μ), typeof(ζ), typeof(select)}(states, μ, ζ, select, washed)
-#     end
-# end
 
 Flux.trainable(model::Model) = (model.states, model.μ, model.ζ)
 @functor Model

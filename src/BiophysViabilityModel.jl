@@ -19,6 +19,7 @@ module BiophysViabilityModel
     export DeepEnergy, ZeroEnergy, learn!
     export number_of_states, number_of_rounds, number_of_libraries, number_of_samples, number_of_sequences, sequence_length, alphabet_size
     export log_likelihood, log_likelihood_samples, log_abundances
+    export Add_Channel, Inflate_Mat, Squeeze_Mat, Output_Diff
 
     include("data.jl")
     include("energies.jl")

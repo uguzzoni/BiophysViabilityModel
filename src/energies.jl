@@ -50,9 +50,31 @@ energies(sequences::Sequences, state::DeepEnergy) = vec(state.m(sequences))
 #
 #create NN model for kelsic data
 #
+
+struct Add_Channel end
+struct Inflate_Mat end
+struct Squeeze_Mat end
+struct Output_Diff end
+
+function (a::Add_Channel)(x)
+    return reshape(x, size(x,1), size(x,2), 1, size(x,3))
+end
+
+function (a::Inflate_Mat)(x)
+    return reshape(x, size(x,1), 1, :)
+end
+
+function (a::Squeeze_Mat)(x)
+    return reshape(x, size(x,1), :)
+end
+
+function (a::Output_Diff)(x)
+    return @views x[2,:] .- x[1,:]
+end
+
 function create_model_kelsic()
     model = Chain(
-        x-> reshape(x, size(x,1), size(x,2), 1, size(x,3)), #adds the channel dimension
+        Add_Channel(), #adds the channel dimension
         Conv((20,7), 1 => 12, relu, pad=SamePad()),
         BatchNorm(12),
         MaxPool((20,2), stride=(1,2)),
@@ -60,14 +82,14 @@ function create_model_kelsic()
         BatchNorm(24),
         MaxPool((1,2),stride=(1,2)),
         Flux.flatten,
-        x -> reshape(x, size(x,1), 1, :),
+        Inflate_Mat(),
         Dense(672 => 128, relu),
         BatchNorm(1),
         Dense(128 => 64, relu),
         BatchNorm(1),
-        x -> reshape(x, size(x,1), :),
+        Squeeze_Mat(),
         Dense(64 => 2, identity),
-        @views x -> x[2,:] .- x[1,:]
+        Output_Diff()
     )
     return model
 end

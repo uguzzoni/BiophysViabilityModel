@@ -19,12 +19,12 @@ struct Model{St,M,Z,F}
     select::F # select[w,r] is true if state 'w' is selected in round 'r'
     washed::F # washed[w,r] is true if state 'w' is washed out in round 'r'
    
-    function Model()
+    function Model(r::Int)
         states=(ZeroEnergy(),Kelsic_model());
-        μ= zeros(2,1); # μ[w,r] chemical potential of state 'w' in round 'r'
-        ζ= zeros(1); # exp(-ζ[r]) is the amplification factor at round 'r'
-        select=reshape([false, true], 2, 1);      # select[w,r] is true if state 'w' is selected in round 'r'
-        washed=reshape([true, false], 2, 1);     # washed[w,r] is true if state 'w' is washed out in round 'r'
+        μ= zeros(2,r); # μ[w,r] chemical potential of state 'w' in round 'r'
+        ζ= zeros(r); # exp(-ζ[r]) is the amplification factor at round 'r'
+        select=hcat([[false, true] for i in 1:r]...);      # select[w,r] is true if state 'w' is selected in round 'r'
+        washed=hcat([[true, false] for i in 1:r]...);     # washed[w,r] is true if state 'w' is washed out in round 'r'
 
         @assert size(μ, 1) == number_of_states(states)
         @assert size(μ, 2) == length(ζ)

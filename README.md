@@ -33,8 +33,7 @@ CODE SIMPLE RUN
 [Jorge Fernandez de Cossio Diaz](https://github.com/cossio)(mailto:),  [Guido Uguzzoni](https://github.com/uguzzoni))(mailto:guido.uguzzoni@gmail.com), [Matteo de Leonardis](https://github.com/matteodeleonardis)(mailto:),[Andrea Pagnani](https://github.com/pagnani))(mailto:andrea.pagnani@gmail.com) 
 
 ## Maintainers
-The [sibyl-team](https://sibyl-team.github.io/)
-
+[Guido Uguzzoni](https://github.com/uguzzoni))(mailto:guido.uguzzoni@gmail.com), [Matteo de Leonardis](https://github.com/matteodeleonardis)(mailto:)
 If you want to participate write us ([sibyl-team](mailto:sibylteam@gmail.com?subject=[GitHub]%20Source%20sibilla)) or make a pull request.
 
 ## License

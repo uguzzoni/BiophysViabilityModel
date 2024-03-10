@@ -45,7 +45,6 @@ history = learn!(model, data; epochs = 1:100, batchsize=256)
 
 ## Maintainers
 [Guido Uguzzoni](https://github.com/uguzzoni)([GU](mailto:guido.uguzzoni@gmail.com)), [Matteo de Leonardis](https://github.com/matteodeleonardis)([MdL](mailto:matteo.deleonardis2@gmail.com))
-If you want to participate write us ([sibyl-team](mailto:sibylteam@gmail.com?subject=[GitHub]%20Source%20sibilla)) or make a pull request.
 
 ## License
 [MIT license](LICENSE)

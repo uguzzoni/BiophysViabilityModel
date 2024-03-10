@@ -19,13 +19,24 @@ This code is written in Julia language. To add `BiophysViabilityModel` package o
 Import("Pkg");Pkg.add("git@github.com:uguzzoni/BiophysViabilityModel.git")
 ```
 
-## Quick start
+## Quick start Example
 
- Have a look at this [notebook](ipynb).
-
-## Example
 ```julia
-CODE SIMPLE RUN
+
+using JLD2, BiophysViabilityModel
+
+data = load("data/data_exp1.jld2")["data_experiment1"]
+
+model = Model(
+        (BiophysViabilityModel.ZeroEnergy(), BiophysViabilityModel.Kelsic_model()),
+        zeros(2,1),
+        zeros(1),
+        reshape([false, true], 2, 1),
+        reshape([true, false], 2, 1)
+    ) 
+
+history = learn!(model, data; epochs = 1:100, batchsize=256)
+
 ```
 
 ## Contributions
@@ -37,4 +48,4 @@ CODE SIMPLE RUN
 If you want to participate write us ([sibyl-team](mailto:sibylteam@gmail.com?subject=[GitHub]%20Source%20sibilla)) or make a pull request.
 
 ## License
-[Apache License 2.0](LICENSE)
+[MIT license](LICENSE)
